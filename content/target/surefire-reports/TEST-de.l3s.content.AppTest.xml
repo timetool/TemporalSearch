@@ -22,7 +22,7 @@
     <property name="basedir" value="/Users/Admin/Work/TemporalSearch/content"/>
     <property name="java.endorsed.dirs" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/endorsed"/>
     <property name="os.arch" value="x86_64"/>
-    <property name="surefire.real.class.path" value="/Users/Admin/Work/TemporalSearch/content/target/surefire/surefirebooter2855956481869840583.jar"/>
+    <property name="surefire.real.class.path" value="/Users/Admin/Work/TemporalSearch/content/target/surefire/surefirebooter8818181720419475442.jar"/>
     <property name="java.io.tmpdir" value="/var/folders/ck/ygmjpw255rb8n7bm9zdqrrfm0000gn/T/"/>
     <property name="line.separator" value="
 "/>
@@ -46,7 +46,7 @@
     <property name="java.vm.specification.version" value="1.0"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="java.home" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"/>
-    <property name="sun.java.command" value="/Users/Admin/Work/TemporalSearch/content/target/surefire/surefirebooter2855956481869840583.jar /Users/Admin/Work/TemporalSearch/content/target/surefire/surefire671298058638856807tmp /Users/Admin/Work/TemporalSearch/content/target/surefire/surefire6487494986838180032tmp"/>
+    <property name="sun.java.command" value="/Users/Admin/Work/TemporalSearch/content/target/surefire/surefirebooter8818181720419475442.jar /Users/Admin/Work/TemporalSearch/content/target/surefire/surefire8007132326785374476tmp /Users/Admin/Work/TemporalSearch/content/target/surefire/surefire2539683520175398668tmp"/>
     <property name="java.specification.vendor" value="Sun Microsystems Inc."/>
     <property name="user.language" value="en"/>
     <property name="awt.toolkit" value="apple.awt.CToolkit"/>
@@ -65,5 +65,5 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase time="0.001" classname="de.l3s.content.AppTest" name="testApp"/>
+  <testcase time="0.002" classname="de.l3s.content.AppTest" name="testApp"/>
 </testsuite>

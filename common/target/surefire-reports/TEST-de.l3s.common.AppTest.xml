@@ -22,7 +22,7 @@
     <property name="basedir" value="/Users/Admin/Work/TemporalSearch/common"/>
     <property name="java.endorsed.dirs" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/lib/endorsed"/>
     <property name="os.arch" value="x86_64"/>
-    <property name="surefire.real.class.path" value="/Users/Admin/Work/TemporalSearch/common/target/surefire/surefirebooter5852507166966916036.jar"/>
+    <property name="surefire.real.class.path" value="/Users/Admin/Work/TemporalSearch/common/target/surefire/surefirebooter560865457439054121.jar"/>
     <property name="java.io.tmpdir" value="/var/folders/ck/ygmjpw255rb8n7bm9zdqrrfm0000gn/T/"/>
     <property name="line.separator" value="
 "/>
@@ -46,7 +46,7 @@
     <property name="java.vm.specification.version" value="1.0"/>
     <property name="sun.arch.data.model" value="64"/>
     <property name="java.home" value="/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home"/>
-    <property name="sun.java.command" value="/Users/Admin/Work/TemporalSearch/common/target/surefire/surefirebooter5852507166966916036.jar /Users/Admin/Work/TemporalSearch/common/target/surefire/surefire8490831773876014714tmp /Users/Admin/Work/TemporalSearch/common/target/surefire/surefire4286061523195597374tmp"/>
+    <property name="sun.java.command" value="/Users/Admin/Work/TemporalSearch/common/target/surefire/surefirebooter560865457439054121.jar /Users/Admin/Work/TemporalSearch/common/target/surefire/surefire7633780554261006228tmp /Users/Admin/Work/TemporalSearch/common/target/surefire/surefire4216401927803637368tmp"/>
     <property name="java.specification.vendor" value="Sun Microsystems Inc."/>
     <property name="user.language" value="en"/>
     <property name="awt.toolkit" value="apple.awt.CToolkit"/>
