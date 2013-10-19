@@ -15,6 +15,9 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import de.l3s.common.models.timeseries.TimeseriesDataPoint;
+import de.l3s.common.models.timeseries.TimeseriesKey;
+
 /**
  * 
  * MovingAverageJob
@@ -39,12 +42,12 @@ public class MovingAverageJob extends Configured implements Tool {
 		conf.setMapOutputKeyClass(TimeseriesKey.class);
 		conf.setMapOutputValueClass(TimeseriesDataPoint.class);
 
-		conf.setMapperClass(MovingAverageMapper.class);
-		conf.setReducerClass(MovingAverageReducer.class);
+		//conf.setMapperClass(MovingAverageMapper.class);
+		//conf.setReducerClass(MovingAverageReducer.class);
 
-		conf.setPartitionerClass(NaturalKeyPartitioner.class);
-		conf.setOutputKeyComparatorClass(CompositeKeyComparator.class);
-		conf.setOutputValueGroupingComparator(NaturalKeyGroupingComparator.class);
+		//conf.setPartitionerClass(NaturalKeyPartitioner.class);
+		//conf.setOutputKeyComparatorClass(CompositeKeyComparator.class);
+		//conf.setOutputValueGroupingComparator(NaturalKeyGroupingComparator.class);
 
 /*		
 		List<String> other_args = new ArrayList<String>();

@@ -11,6 +11,10 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
+import de.l3s.common.features.hadoop.movingaverage.SlidingWindow;
+import de.l3s.common.models.timeseries.TimeseriesDataPoint;
+import de.l3s.common.models.timeseries.TimeseriesKey;
+
 /**
  * MovingAverageReducer
  * 

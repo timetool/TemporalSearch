@@ -11,6 +11,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
+import de.l3s.common.models.timeseries.TimeseriesDataPoint;
+
 public class NoShuffleSort_MovingAverageMapper  extends MapReduceBase implements Mapper<LongWritable, Text, Text, TimeseriesDataPoint> 
 {
 
@@ -43,7 +45,7 @@ public class NoShuffleSort_MovingAverageMapper  extends MapReduceBase implements
 	   public void map(LongWritable inkey, Text value, OutputCollector<Text, TimeseriesDataPoint> output, Reporter reporter) throws IOException {
 
 	      String line = value.toString();
-	      
+	      /**
 	      YahooStockDataPoint rec = YahooStockDataPoint.parse( line );
 	      
 	      if (rec != null) {
@@ -62,6 +64,7 @@ public class NoShuffleSort_MovingAverageMapper  extends MapReduceBase implements
 	    	  reporter.incrCounter( Timeseries_Counters.BAD_PARSE, 1 );
 	    	  
 	      }
+	      */
 	    	  
 	   }
 

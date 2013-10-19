@@ -2,6 +2,8 @@ package de.l3s.common.features.hadoop.movingaverage;
 
 import java.util.LinkedList;
 
+import de.l3s.common.models.timeseries.TimeseriesDataPoint;
+
 /**
  * SlidingWindow
  * 

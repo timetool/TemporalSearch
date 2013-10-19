@@ -16,6 +16,8 @@ import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import de.l3s.common.models.timeseries.TimeseriesDataPoint;
+
 /**
  * Map Reduce job demonstrating time series data being processed without
  * secondary sort.
@@ -38,8 +40,8 @@ public class NoShuffleSort_MovingAverageJob extends Configured implements Tool {
 		conf.setMapOutputKeyClass(Text.class);
 		conf.setMapOutputValueClass(TimeseriesDataPoint.class);
 
-		conf.setMapperClass(NoShuffleSort_MovingAverageMapper.class);
-		conf.setReducerClass(NoShuffleSort_MovingAverageReducer.class);
+		//conf.setMapperClass(NoShuffleSort_MovingAverageMapper.class);
+		//conf.setReducerClass(NoShuffleSort_MovingAverageReducer.class);
 
 		List<String> other_args = new ArrayList<String>();
 		for (int i = 0; i < args.length; ++i) {
