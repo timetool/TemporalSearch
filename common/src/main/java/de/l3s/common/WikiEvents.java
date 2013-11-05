@@ -66,7 +66,7 @@ public class WikiEvents {
 	 * @param csvPath
 	 * @throws FileNotFoundException 
 	 */
-	public void putTimeSeriesData(HTable table, File csvFile) throws FileNotFoundException {
+	public void putTimeSeriesDataToHBase(HTable table, File csvFile) throws FileNotFoundException {
 		//get event name frome file path
 		String eventName = csvFile.getName().replace(".vtime", "").replace(" ","_");
 		System.out.println(csvFile.getAbsolutePath());
@@ -105,6 +105,7 @@ public class WikiEvents {
 			e.printStackTrace();
 		}
 	}
+	
 
 	public static void main(String[] args) {
 		WikiEvents we = new WikiEvents();
@@ -140,7 +141,7 @@ public class WikiEvents {
 		//dump data
 		for (File f : fileSet_) {
 			try {
-				we.putTimeSeriesData(htable, f);
+				we.putTimeSeriesDataToHBase(htable, f);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

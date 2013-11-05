@@ -12,8 +12,6 @@ import org.apache.hadoop.mapred.Reporter;
 import de.l3s.common.models.timeseries.TimeseriesDataPoint;
 import de.l3s.common.models.timeseries.TimeseriesKey;
 
-
-
 public class CorrelationMapper extends MapReduceBase implements
 Mapper<LongWritable, Text, TimeseriesKey, TimeseriesDataPoint> {
 
