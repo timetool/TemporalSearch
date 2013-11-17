@@ -98,12 +98,14 @@ public class TimeSeriesJob  extends Configured implements Tool{
 		}
 
 		if (cl.hasOption(REMOVE_OUTPUT)) {
-		
+
 		}
 
+
+		String input = cl.getOptionValue(INPUT_OPT);
 		
-		 String input = cl.getOptionValue(INPUT_OPT);
-         String output = cl.getOptionValue(OUTPUT_OPT);
+		///user/nguyen/WikiTS/output
+		String output = cl.getOptionValue(OUTPUT_OPT);
 
 
 		JobConf conf = new JobConf(getConf(), TimeSeriesJob.class);
