@@ -12,15 +12,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import de.l3s.common.hadoop.WholeFileInputFormat;
 import de.l3s.common.models.timeseries.Timeseries;
 
 public class TimeSeriesJob  extends Configured implements Tool{
@@ -38,26 +37,26 @@ public class TimeSeriesJob  extends Configured implements Tool{
 		Options opts = new Options();
 
 		Option jnameOpt = OptionBuilder.withArgName("job-name").hasArg(true)
-				.withDescription("Timeseries analysis")
-				.create(JOB_NAME);
+		.withDescription("Timeseries analysis")
+		.create(JOB_NAME);
 
 		Option inputOpt = OptionBuilder.withArgName("input-path").hasArg(true)
-				.withDescription("Timeseries file path (required)")
-				.create(INPUT_OPT);
+		.withDescription("Timeseries file path (required)")
+		.create(INPUT_OPT);
 
 		Option outputOpt = OptionBuilder.withArgName("output-path").hasArg(true)
-				.withDescription("output file path (required)")
-				.create(OUTPUT_OPT);
+		.withDescription("output file path (required)")
+		.create(OUTPUT_OPT);
 
 		Option reduceOpt = OptionBuilder.withArgName("reduce-no").hasArg(true)
-				.withDescription("number of reducer nodes").create(REDUCE_NO);
+		.withDescription("number of reducer nodes").create(REDUCE_NO);
 
 		Option rmOpt = OptionBuilder.withArgName("remove-out").hasArg(false)
-				.withDescription("remove the output then create again before writing files onto it")
-				.create(REMOVE_OUTPUT);
+		.withDescription("remove the output then create again before writing files onto it")
+		.create(REMOVE_OUTPUT);
 
 		Option cOpt = OptionBuilder.withArgName("compress-option").hasArg(true)
-				.withDescription("compression option").create(COMPRESS_OPT);
+		.withDescription("compression option").create(COMPRESS_OPT);
 
 		opts.addOption(jnameOpt);
 		opts.addOption(inputOpt);
@@ -91,7 +90,7 @@ public class TimeSeriesJob  extends Configured implements Tool{
 			}
 		}
 
-		String jobName = "Timeseries correlation";
+		String jobName = "Distributed timeseries [R] correlation";
 		if (cl.hasOption(JOB_NAME)) {
 			jobName = cl.getOptionValue(JOB_NAME);
 			jobName = jobName.replace('-', ' ');
@@ -103,30 +102,25 @@ public class TimeSeriesJob  extends Configured implements Tool{
 
 
 		String input = cl.getOptionValue(INPUT_OPT);
-		
+
 		///user/nguyen/WikiTS/output
 		String output = cl.getOptionValue(OUTPUT_OPT);
 
+		Configuration conf = getConf();
+		Job job = new Job(conf, jobName);
+        job.setJarByClass(TimeSeriesJob.class);
+		job.setMapperClass(TimeSeriesMapper.class);
+		job.setReducerClass(TimeSeriesReducer.class);
 
-		JobConf conf = new JobConf(getConf(), TimeSeriesJob.class);
-		conf.setJobName(jobName);
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(Timeseries.class);
 
-		conf.setMapOutputKeyClass(Text.class);
-		conf.setMapOutputValueClass(Timeseries.class);
+		job.setNumReduceTasks(reduceNo);
 
-		conf.setNumReduceTasks(reduceNo);
+		WholeFileInputFormat.setInputPaths(job, input);
+		FileOutputFormat.setOutputPath(job, new Path(output));
 
-		conf.setInputFormat(TextInputFormat.class);
-
-		conf.setOutputFormat(TextOutputFormat.class);
-		conf.setCompressMapOutput(true);
-
-		FileInputFormat.setInputPaths(conf, input);
-		FileOutputFormat.setOutputPath(conf, new Path(output));
-
-		JobClient.runJob(conf);
-
-		return 0;
+		return job.waitForCompletion(true) ? 0 : 1;
 	}
 
 

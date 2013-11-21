@@ -7,7 +7,7 @@
 		<groupId>timetool</groupId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>wikievent-hbase</artifactId>
+	<artifactId>timeseries-analysis</artifactId>
 	<packaging>jar</packaging>
 	<name>common timetool</name>
 	<properties>
@@ -44,7 +44,7 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>de.l3s.common.WikiEvents</mainClass>
+									<mainClass>de.l3s.common.features.hadoop.TimeSeriesJob</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

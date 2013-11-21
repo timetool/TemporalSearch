@@ -7,36 +7,22 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 import com.google.common.collect.Lists;
 
+import de.l3s.common.features.TimeSeriesFeatures;
 import de.l3s.common.models.timeseries.KeyData;
 import de.l3s.common.models.timeseries.Timeseries;
 
 
-public class TimeSeriesReducer extends MapReduceBase implements
-Reducer<Text, Timeseries, Text, DoubleWritable> {
-	
-	private JobConf configuration;
-
+public class TimeSeriesReducer extends Reducer<Text, Timeseries, Text, DoubleWritable> {
 	
 	TimeSeriesFeatures eval = new TimeSeriesFeatures();
-	
-	@Override
-	public void configure(JobConf job) {
 
-		this.configuration = job;
-
-	}
-
-	@Override
 	public void reduce(Text key, Iterator<Timeseries> values,
-			OutputCollector<Text, DoubleWritable> output, Reporter reporter) throws IOException {
+			Context context) throws IOException, InterruptedException {
+		////-Djava.library.path = /usr/lib64/R/library/rJava/jri
 		Timeseries timeSeries;
 		List<Integer> ts_list = Lists.newArrayList();
 		while(values.hasNext()) {
@@ -44,12 +30,12 @@ Reducer<Text, Timeseries, Text, DoubleWritable> {
 			timeSeries = values.next();
 			
 			for (KeyData keydata : timeSeries.ts_points) {
-				ts_list.add((int)keydata.dataPoint.fValue);
+				ts_list.add((int) keydata.dataPoint.fValue);
 			}
 			
 			double[] acf_score = eval.computeAutoCorrel(ts_list.size(), ArrayUtils.toPrimitive(ts_list.toArray(new Integer[ts_list.size()])));
 			
-			output.collect(key, new DoubleWritable(acf_score[0]));			
+			context.write(key, new DoubleWritable(acf_score[0]));			
 		}
 		
 	}
