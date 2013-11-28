@@ -1,4 +1,5 @@
-package de.l3s.common.features.hadoop;
+package de.l3s.common.hadoop;
+
 /*
  * TIMETool - Large-scale Temporal Search in MapReduce
  *
@@ -32,44 +33,24 @@ package de.l3s.common.features.hadoop;
  * @author 
  */
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.fs.Path;
 
-import com.google.common.collect.Lists;
+public class WholeFileInputFormat extends FileInputFormat<LongWritable, Text> {
+    @Override
+    protected boolean isSplitable(JobContext context, Path filename) {
+        return false;
+    }
 
-import de.l3s.common.features.TimeSeriesFeatures;
-import de.l3s.common.models.timeseries.KeyData;
-import de.l3s.common.models.timeseries.Timeseries;
-
-
-public class TimeSeriesReducer extends Reducer<Text, Timeseries, Text, DoubleWritable> {
-	
-	TimeSeriesFeatures eval = new TimeSeriesFeatures();
-
-	public void reduce(Text key, Iterator<Timeseries> values,
-			Context context) throws IOException, InterruptedException {
-		// To load JRI library
-		// Set -Djava.library.path = /usr/lib64/R/library/rJava/jri
-		Timeseries timeSeries;
-		List<Integer> ts_list = Lists.newArrayList();
-		while(values.hasNext()) {
-			
-			timeSeries = values.next();	
-			for (KeyData keydata : timeSeries.ts_points) {
-				ts_list.add((int) keydata.dataPoint.fValue);
-			}
-			// calculate auto correlation score
-			double[] acf_score = eval.computeAutoCorrel(ts_list.size(), ArrayUtils.toPrimitive(ts_list.toArray(new Integer[ts_list.size()])));
-			
-			context.write(key, new DoubleWritable(acf_score[0]));			
-		}
-		
-	}
-
+    @Override
+    public RecordReader<LongWritable, Text> createRecordReader(
+      InputSplit split, TaskAttemptContext context) {
+        return new WholeFileRecordReader();
+    }
 }

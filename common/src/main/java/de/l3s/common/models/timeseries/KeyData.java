@@ -10,6 +10,11 @@ public final class KeyData {
 		this.key = key;
 	}
 	
+	public KeyData() {
+		this.dataPoint = new TimeseriesDataPoint();
+		this.key = new TimeseriesKey();
+	}
+	
 	public static KeyData make (TimeseriesDataPoint dataPoint, TimeseriesKey key) {
 		return new KeyData(dataPoint, key);
 	}

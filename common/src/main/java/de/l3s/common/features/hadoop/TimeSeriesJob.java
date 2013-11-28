@@ -1,5 +1,39 @@
 package de.l3s.common.features.hadoop;
 
+/*
+ * TIMETool - Large-scale Temporal Search in MapReduce
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE LEMUR PROJECT AS PART OF THE CLUEWEB09
+ * PROJECT AND OTHER CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+ * NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author 
+ */
+import java.net.URI;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -10,6 +44,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -31,6 +66,7 @@ public class TimeSeriesJob  extends Configured implements Tool{
 	private static final String COMPRESS_OPT = "compress";
 
 	private static final int DEFAULT_REDUCER_NO = 24;
+	
 
 	@Override
 	public int run(String[] args) throws Exception {
@@ -100,13 +136,12 @@ public class TimeSeriesJob  extends Configured implements Tool{
 
 		}
 
-
 		String input = cl.getOptionValue(INPUT_OPT);
-
-		///user/nguyen/WikiTS/output
 		String output = cl.getOptionValue(OUTPUT_OPT);
 
 		Configuration conf = getConf();
+		DistributedCache.createSymlink(conf); 
+		DistributedCache.addCacheFile(new URI("hdfs://master.hadoop:8020/user/nguyen/lib/"), conf);
 		Job job = new Job(conf, jobName);
         job.setJarByClass(TimeSeriesJob.class);
 		job.setMapperClass(TimeSeriesMapper.class);
@@ -114,9 +149,10 @@ public class TimeSeriesJob  extends Configured implements Tool{
 
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(Timeseries.class);
-
+		
+        
 		job.setNumReduceTasks(reduceNo);
-
+        job.setInputFormatClass(WholeFileInputFormat.class);
 		WholeFileInputFormat.setInputPaths(job, input);
 		FileOutputFormat.setOutputPath(job, new Path(output));
 
