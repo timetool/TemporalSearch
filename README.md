@@ -1,2 +1,3 @@
 temporal-search
 ===============
+The TIMETool project provides an open-source library for temporal search, which is an implementation of state-of-the-art approaches in MapReduce. This will serve as a toolkit for effective and efficient search on temporal Web collections. In such collections, documents are created and/or edited over time, and examples are web archives, news archives, blogs, personal emails and enterprise documents. The expected outcome of this project can be seen as a pragmatic contribution aimed at supporting similar endeavors, i.e., prospective researchers or practitioners, to study temporal search or advance it into temporal exploration and analytics studies.
