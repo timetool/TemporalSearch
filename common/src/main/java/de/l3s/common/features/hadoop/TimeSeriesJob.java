@@ -140,9 +140,9 @@ public class TimeSeriesJob  extends Configured implements Tool{
 		String output = cl.getOptionValue(OUTPUT_OPT);
 
 		Configuration conf = getConf();
-		DistributedCache.createSymlink(conf); 
-		DistributedCache.addCacheFile(new URI("hdfs://master.hadoop:8020/user/nguyen/lib/"), conf);
-		Job job = new Job(conf, jobName);
+		//DistributedCache.createSymlink(conf); 
+		//DistributedCache.addCacheFile(new URI("hdfs://master.hadoop:8020/user/nguyen/lib/"), conf);
+		Job job = Job.getInstance(conf, jobName);
         job.setJarByClass(TimeSeriesJob.class);
 		job.setMapperClass(TimeSeriesMapper.class);
 		job.setReducerClass(TimeSeriesReducer.class);
