@@ -1,0 +1,60 @@
+################################
+##           MAIN             ##
+################################
+# Consideration of different timex3-types
+# Date
+considerDate = true
+
+# Duration
+considerDuration = true
+
+# Set
+considerSet = true
+
+# Time
+considerTime = true
+
+
+###################################################
+# Path to TreeTagger (Uni Stuttgart) home directory
+###################################################
+# Ensure there is no white space in path (try to escape white spaces)
+treeTaggerHome = /Volumes/DATA/Work/tools/heideltime/treetagger_copy
+#treeTaggerHome = /opt/heideltime/treetagger
+
+
+#####################################################
+# paths to Stanford POS Tagger model or config files:
+#####################################################
+model_path = SET ME IN CONFIG.PROPS!
+# leave this unset if you do not need one
+config_path = 
+
+
+
+# DO NOT CHANGE THE FOLLOWING
+################################
+# Relative path of type system in HeidelTime home directory
+typeSystemHome = desc/type/HeidelTime_TypeSystem.xml
+
+# Relative path of dkpro type system in HeidelTime home directory
+typeSystemHome_DKPro = desc/type/DKPro_TypeSystem.xml
+
+# Name of uima-context variables...
+# ...for date-consideration
+uimaVarDate = Date
+
+# ...for duration-consideration
+uimaVarDuration = Duration
+
+# ...for language
+uimaVarLanguage = Language
+
+# ...for set-consideration
+uimaVarSet = Set
+
+# ...for time-consideration
+uimaVarTime = Time
+
+# ...for type to process
+uimaVarTypeToProcess = Type
