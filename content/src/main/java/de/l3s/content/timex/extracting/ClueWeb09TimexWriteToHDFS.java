@@ -41,11 +41,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Scanner;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -53,17 +51,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
-import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -73,7 +63,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
@@ -145,24 +134,19 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 
 	private static class TMapper
 	extends Mapper<LongWritable, ClueWeb09WarcRecord, Text, Writable> {
-		private byte[] family = null;
-		private byte[] qualifier = null;
 
 		@Override
 		protected void setup(Context context)
-		throws IOException, InterruptedException {
+				throws IOException, InterruptedException {
 		}
 
 		@Override
 		public void map(LongWritable key, ClueWeb09WarcRecord doc, Context context)
-		throws IOException, InterruptedException {
+				throws IOException, InterruptedException {
 
 
 			String docid = doc.getDocid();
-
 			String url = doc.getHeaderMetadataItem("WARC-Target-URI");
-			
-			LOG.info(url);
 			/**
 		    if (url == null) return;
 			String site = new URL(url).getHost();
@@ -178,52 +162,44 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 					//clean html
 					String content = ArticleExtractor.INSTANCE.getText(doc.getContent());
 					Scanner contentScanner = new Scanner(content);
-					if (!contentScanner.hasNextLine()) {
-						//get publication date from URL
-						Pair<String, String> _docDate = DateUtil.extractDateFromURL_(url);
-						docDate = (_docDate != null) ? _docDate : docDate;
-
-						context.write(new Text(docid + "\t" + docDate.toString() + "\t" + "N/A" + "\t" + "N/A"), null);
+					String firstLines = contentScanner.nextLine() + contentScanner.nextLine();
+					contentScanner.close();
+					//assume the publication date is from the first 2 lines
+					String pubDateTags = HeidelTimeStandalone.tag(content, firstLines, DocumentType.NARRATIVES);
+					Matcher date = (pubDateTags == null) ? null : timex3Date.matcher(pubDateTags);
+					//the first extracted absolute date is the publication date
+					if (date != null && date.find()) {
+						docDate = (date.group(2).length() == "yyyy-MM-dd".length()) ? Pair.makePair(date.group(2), STRONG) : Pair.makePair(date.group(2), MILDLY_STRONG);
 					} else {
-						String firstLines = contentScanner.nextLine() + (contentScanner.hasNextLine() ? contentScanner.nextLine() : "");
-						contentScanner.close();
-						//assume the publication date is from the first 2 lines
-						String pubDateTags = HeidelTimeStandalone.tag(content, firstLines, DocumentType.NARRATIVES);
-						Matcher date = (pubDateTags == null) ? null : timex3Date.matcher(pubDateTags);
-						//the first extracted absolute date is the publication date
-						if (date != null && date.find()) {
-							docDate = (date.group(2).length() == "yyyy-MM-dd".length()) ? Pair.makePair(date.group(2), STRONG) : Pair.makePair(date.group(2), MILDLY_STRONG);
-						} else {
-							//get publication date from URL
-							Pair<String, String> _docDate = DateUtil.extractDateFromURL_(url);
-							docDate = (_docDate != null) ? _docDate : docDate;
-						}
-						String timetags;
-						StringBuffer _timetags = new StringBuffer();
-						//if publication date is not extracted then very likely it is not a web article
-						LOG.info("Doc date:" + docDate.toString());
-						if (!docDate.second.contains("strong")) {
-							//content = DefaultExtractor.INSTANCE.getText(doc.getContent());
-							//reference point is not important here
-							//for HeidelTime
-							timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.NARRATIVES);
-							//annotation is not necessary here 
-						} else {
-							timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.COLLOQUIAL);
-							ArrayList<Triple<String, String, String>>  triples = HeidelTimeAnnotator.annotate(content, docDate.first);
-							for (Triple<String, String, String> triple : triples) {
-								_timetags.append(triple.toString());
-							}
-						}
-
-						LOG.info("Doc date: " + docDate.toString());
-						LOG.info("Time tags: " + timetags);
-
-						//context.getCounter(Counters.LINES).increment(1);
-
-						context.write(new Text(docid + "\t" + docDate.toString() + "\t" + timetags.toString() + "\t" + _timetags.toString()), null);
-
+						//get publication date from URL
+						docDate = DateUtil.extractDateFromURL_(url);
 					}
+					String timetags;
+					StringBuffer _timetags = new StringBuffer();
+					//if publication date is not extracted then very likely it is not a web article
+					LOG.info("Doc date:" + docDate.toString());
+					if (!docDate.second.contains("strong")) {
+						content = DefaultExtractor.INSTANCE.getText(doc.getContent());
+						//reference point is not important here
+						//for HeidelTime
+						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.NARRATIVES);
+						//annotation is not necessary here 
+					} else {
+						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.COLLOQUIAL);
+						ArrayList<Triple<String, String, String>>  triples = HeidelTimeAnnotator.annotate(content, docDate.first);
+						for (Triple<String, String, String> triple : triples) {
+							_timetags.append(triple.toString());
+						}
+					}
+
+
+					LOG.info("Doc date: " + docDate.toString());
+					LOG.info("Time tags: " + timetags);
+
+					//context.getCounter(Counters.LINES).increment(1);
+
+					context.write(new Text(docid + "\t" + docDate.toString() + "\t" + timetags.toString() + "\t" + _timetags.toString()), null);
+
 				} catch (BoilerpipeProcessingException e) {}
 				catch (ArrayIndexOutOfBoundsException ae) {}
 			}
@@ -237,7 +213,7 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 
 		public void reduce(Text key, Iterable<IntWritable> values, 
 				Context context
-		) throws IOException, InterruptedException {
+				) throws IOException, InterruptedException {
 			int sum = 0;
 			for (IntWritable val : values) {
 				sum += val.get();
@@ -290,9 +266,9 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 		LOG.info("Tool name: " + ClueWeb09TimexWriteToHDFS.class.getSimpleName());
 		LOG.info(" - input: " + input);
 		LOG.info(" - output: " + output);
-		
-		
-		
+
+
+
 		Configuration conf = new Configuration();
 		long milliSeconds = 10000*60*60; //x10 default
 		conf.setLong("mapred.task.timeout", milliSeconds);
