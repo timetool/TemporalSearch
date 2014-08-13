@@ -269,7 +269,7 @@ public class DateUtil {
 							if (date.find()) {
 								String[] token = date.group().substring(1).split("/");
 								try{
-									extractedDate = LocalDate.parse((token[1] + "0" + token[0] + "15").toString(), dateFormat);
+									extractedDate = LocalDate.parse((token[0] + token[1] + "15").toString(), dateFormat);
 								}catch(IllegalFieldValueException e){
 									return null;
 								}
@@ -428,7 +428,7 @@ public class DateUtil {
 							if (date.find()) {
 								String[] token = date.group().substring(1).split("/");
 								try{
-									extractedDate = Pair.makePair(LocalDate.parse((token[1] + "0" + token[0] + "15").toString(), dateFormat).toString(), "mildly strong");
+									extractedDate = Pair.makePair(LocalDate.parse((token[0] + token[1] + "15").toString(), dateFormat).toString(), "mildly strong");
 								}catch(IllegalFieldValueException e){
 									return null;
 								}
@@ -492,7 +492,7 @@ public class DateUtil {
 	    return sb.toString();
 	}
 	public static void main (String[] args) {
-		System.out.println(DateUtil.extractDateFromURL("http://ktwop.wordpress.com/2013/05/14/how-retrospective-prediction-works/"));
+		System.out.println(DateUtil.extractDateFromURL("http://0009.org/blog/index.php/2006/10/"));
 
 	}
 }
