@@ -103,6 +103,11 @@ public class HeidelTimeStandalone {
 	 */
 	private static Logger logger = Logger.getLogger("HeidelTimeStandalone");
 
+	//for local
+	//String configPath = "conf/config.props";
+	//for cluster
+    static String configPath = "/opt/heideltime/conf/config.props";
+
 	
 	/**
 	 * empty constructor.
@@ -123,7 +128,8 @@ public class HeidelTimeStandalone {
 	 * @param outputType
 	 */
 	public HeidelTimeStandalone(Language language, DocumentType typeToProcess, OutputType outputType) {
-		this(language, typeToProcess, outputType, null);
+		
+		this(language, typeToProcess, outputType, configPath);
 	}
 	
 	/**
@@ -772,10 +778,7 @@ public class HeidelTimeStandalone {
 			
 			// should not be necessary, but without this, it's not running on Windows (?)
 			input = new String(input.getBytes("UTF-8"), "UTF-8");
-			//for local
-			//String configPath = "conf/config.props";
-			//for cluster
-			String configPath = "/opt/heideltime/conf/config.props";
+			
 			String out = "";
 			if (outputType.toString().equals("xmi")){
 				ResultFormatter resultFormatter = new XMIResultFormatter();
