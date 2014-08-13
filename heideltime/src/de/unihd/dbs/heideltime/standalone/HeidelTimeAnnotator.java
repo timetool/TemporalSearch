@@ -325,8 +325,8 @@ public class HeidelTimeAnnotator {
 		"North Korea to Iran. Last week is the day.";
 		
 		String _input = "tomorrow and yesterday";
-		HeidelTimeStandalone hd = new HeidelTimeStandalone();
-        String processed = hd.tag(_input, "2012-04-20", DocumentType.NEWS);
+		HeidelTimeStandalone hd = new HeidelTimeStandalone(Language.ENGLISH, DocumentType.NEWS, OutputType.TIMEML);
+        String processed = hd.tag(_input, "2012-04-20");
         System.out.println(processed);
 		ArrayList<Triple<String, String, String>> dateList = HeidelTimeAnnotator.annotate(processed, "2012-04-20");
 		for (Triple<String, String, String> dates : dateList) {

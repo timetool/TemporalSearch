@@ -749,26 +749,9 @@ public class HeidelTimeStandalone {
 	 * tag one string input
 	 * dctstr is Date in format yyyy-MM-dd
 	 */
-	public static String tag(String input, String dctstr, DocumentType type) {
+	public String tag(String input, String dctstr) {
 		StringBuilder output = new StringBuilder();
-		// Parse command line parameters
-		System.err.println("Parameters recognized:");
-
-		// Check input encoding
-		System.err.print("Encoding '-e': ");
-		String encodingType = "UTF-8";
-				
-		// Check output format
-		System.err.print("Output '-o': ");
-		OutputType outputType = null;
-		outputType = OutputType.TIMEML;
 		
-		
-		// Check language
-		Language language = null;
-		language = Language.ENGLISH;
-		
-
 		// Check type
 		//DocumentType type = DocumentType.COLLOQUIAL;
 		
@@ -789,25 +772,19 @@ public class HeidelTimeStandalone {
 			
 			// should not be necessary, but without this, it's not running on Windows (?)
 			input = new String(input.getBytes("UTF-8"), "UTF-8");
-			String configPath = "conf/config.props";
-			//String configPath = "/opt/heideltime/conf/config.props";
-			HeidelTimeStandalone standalone = new HeidelTimeStandalone(
-					language, type, outputType, configPath);
+			//for local
+			//String configPath = "conf/config.props";
+			//for cluster
+			String configPath = "/opt/heideltime/conf/config.props";
 			String out = "";
 			if (outputType.toString().equals("xmi")){
 				ResultFormatter resultFormatter = new XMIResultFormatter();
-				out = standalone.process(input, dct, resultFormatter);	
+				out = process(input, dct, resultFormatter);	
 			}
 			else{
 				ResultFormatter resultFormatter = new TimeMLResultFormatter();
-				out = standalone.process(input, dct, resultFormatter);
+				out = process(input, dct, resultFormatter);
 			}
-			
-
-			// Print output always as UTF-8
-//			PrintWriter pwOut = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
-//			pwOut.println(out);
-//			pwOut.close();
 			
 			String [] tmp = out.split("\n");
 			for (int i = 3; i<tmp.length-1; i++) {
@@ -869,8 +846,8 @@ public class HeidelTimeStandalone {
 	"</p>−<p>The explosives were hidden in a container transporting\n" +
 	        "    powdered milk.</p>−<p> Last year seizures included military hardware being sent from" +
 	        "North Korea to Iran.";
-		
-		System.out.println(HeidelTimeStandalone.tag("Saturday December 10, 2010", "2011-10-01", DocumentType.NARRATIVES));
+		HeidelTimeStandalone standalone = new HeidelTimeStandalone(Language.ENGLISH, DocumentType.NARRATIVES, OutputType.TIMEML);
+		System.out.println(standalone.tag("Saturday December 10, 2010", "2011-10-01"));
 
 	}
 
