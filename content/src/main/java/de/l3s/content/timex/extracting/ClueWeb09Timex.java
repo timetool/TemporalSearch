@@ -34,18 +34,15 @@ package de.l3s.content.timex.extracting;
  */
 
 import java.io.IOException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Scanner;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -54,12 +51,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
@@ -72,7 +67,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
@@ -107,6 +101,7 @@ public class ClueWeb09Timex extends Configured implements Tool{
 	public static final String VERY_WEAK = "very weak";
 	public static final String WEAK = "weak";
 	public static final String STRONG = "strong";
+	public static final String MILDLY_STRONG = "mildly strong";
 	public static final String VERY_STRONG = "very strong";
 	
 	public enum Counters { LINES }
@@ -180,23 +175,32 @@ public class ClueWeb09Timex extends Configured implements Tool{
 			if (docid != null) {
 				try {
 					//clean html
+					LOG.info(docid);
+		
 					String content = ArticleExtractor.INSTANCE.getText(doc.getContent());
+			        if (content == null || content.equals("")) {
+			        	//do not save records with empty content
+			        	return;
+			        }
 					Scanner contentScanner = new Scanner(content);
-					String firstLines = contentScanner.nextLine() + contentScanner.nextLine();
+					String firstLines = (contentScanner.hasNext()) ? contentScanner.nextLine() : "" + ((contentScanner.hasNext()) ? contentScanner.nextLine() : "" );
 					contentScanner.close();
 					//assume the publication date is from the first 2 lines
 					String pubDateTags = HeidelTimeStandalone.tag(content, firstLines, DocumentType.NARRATIVES);
 					Matcher date = (pubDateTags == null) ? null : timex3Date.matcher(pubDateTags);
 					//the first extracted absolute date is the publication date
 					if (date != null && date.find()) {
-						docDate = (date.group(2).length() == "yyyy-MM-dd".length()) ? Pair.makePair(date.group(2), STRONG) : docDate;
+						docDate = (date.group(2).length() == "yyyy-MM-dd".length()) ? Pair.makePair(date.group(2), STRONG) : Pair.makePair(date.group(2), MILDLY_STRONG);
 					} else {
 						//get publication date from URL
-						docDate = DateUtil.extractDateFromURL_(url);
+						Pair<String, String> docDateURL = DateUtil.extractDateFromURL_(url);
+						docDate = (docDateURL == null) ? docDate : docDateURL;
 					}
 					String timetags;
 					StringBuffer _timetags = new StringBuffer();
 					//if publication date is not extracted then very likely it is not a web article
+
+					LOG.info("Doc date:" + docDate.toString());
 					if (!docDate.second.contains("strong")) {
 						content = DefaultExtractor.INSTANCE.getText(doc.getContent());
 						//reference point is not important here
@@ -316,8 +320,8 @@ public class ClueWeb09Timex extends Configured implements Tool{
 		job.setJarByClass(ClueWeb09Timex.class);
 		job.setNumReduceTasks(0);
 
-
-
+    
+        
 		job.setInputFormatClass(ClueWeb09InputFormat.class);
 		job.setOutputFormatClass(TableOutputFormat.class);
 		job.getConfiguration().set(TableOutputFormat.OUTPUT_TABLE, output);
