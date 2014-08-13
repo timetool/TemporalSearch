@@ -76,6 +76,8 @@ import de.l3s.content.timex.extracting.utils.DateUtil;
 import de.unihd.dbs.heideltime.standalone.DocumentType;
 import de.unihd.dbs.heideltime.standalone.HeidelTimeAnnotator;
 import de.unihd.dbs.heideltime.standalone.HeidelTimeStandalone;
+import de.unihd.dbs.heideltime.standalone.OutputType;
+import de.unihd.dbs.uima.annotator.heideltime.resources.Language;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
@@ -134,10 +136,14 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 
 	private static class TMapper
 	extends Mapper<LongWritable, ClueWeb09WarcRecord, Text, Writable> {
-
+		
+		HeidelTimeStandalone narrative = null;
+		HeidelTimeStandalone colloguial= null;
 		@Override
 		protected void setup(Context context)
 				throws IOException, InterruptedException {
+			narrative = new HeidelTimeStandalone(Language.ENGLISH, DocumentType.NARRATIVES, OutputType.TIMEML);
+			colloguial= new HeidelTimeStandalone(Language.ENGLISH, DocumentType.COLLOQUIAL, OutputType.TIMEML);
 		}
 
 		@Override
@@ -171,7 +177,7 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 					String firstLines = (contentScanner.hasNext()) ? contentScanner.nextLine() : "" + ((contentScanner.hasNext()) ? contentScanner.nextLine() : "" );
 					contentScanner.close();
 					//assume the publication date is from the first 2 lines
-					String pubDateTags = HeidelTimeStandalone.tag(content, firstLines, DocumentType.NARRATIVES);
+					String pubDateTags = narrative.tag(content, firstLines);
 					Matcher date = (pubDateTags == null) ? null : timex3Date.matcher(pubDateTags);
 					//the first extracted absolute date is the publication date
 					if (date != null && date.find()) {
@@ -190,10 +196,10 @@ public class ClueWeb09TimexWriteToHDFS extends Configured implements Tool{
 						content = DefaultExtractor.INSTANCE.getText(doc.getContent());
 						//reference point is not important here
 						//for HeidelTime
-						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.NARRATIVES);
+						timetags = narrative.tag(content, docDate.first);
 						//annotation is not necessary here 
 					} else {
-						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.COLLOQUIAL);
+						timetags = colloguial.tag(content, docDate.first);
 						ArrayList<Triple<String, String, String>>  triples = HeidelTimeAnnotator.annotate(content, docDate.first);
 						for (Triple<String, String, String> triple : triples) {
 							_timetags.append(triple.toString());

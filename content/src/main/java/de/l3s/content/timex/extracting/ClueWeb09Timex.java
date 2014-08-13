@@ -80,6 +80,8 @@ import de.l3s.content.timex.extracting.utils.DateUtil;
 import de.unihd.dbs.heideltime.standalone.DocumentType;
 import de.unihd.dbs.heideltime.standalone.HeidelTimeAnnotator;
 import de.unihd.dbs.heideltime.standalone.HeidelTimeStandalone;
+import de.unihd.dbs.heideltime.standalone.OutputType;
+import de.unihd.dbs.uima.annotator.heideltime.resources.Language;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
@@ -140,6 +142,9 @@ public class ClueWeb09Timex extends Configured implements Tool{
 	extends Mapper<LongWritable, ClueWeb09WarcRecord, ImmutableBytesWritable, Writable> {
 		private byte[] family = null;
 		private byte[] qualifier = null;
+		
+		HeidelTimeStandalone narrative = null;
+		HeidelTimeStandalone colloguial= null;
 
 		@Override
 		protected void setup(Context context)
@@ -150,6 +155,8 @@ public class ClueWeb09Timex extends Configured implements Tool{
 //			if (colkey.length > 1) {
 //				qualifier = colkey[1];
 //			}
+			narrative = new HeidelTimeStandalone(Language.ENGLISH, DocumentType.NARRATIVES, OutputType.TIMEML);
+			colloguial= new HeidelTimeStandalone(Language.ENGLISH, DocumentType.COLLOQUIAL, OutputType.TIMEML);
 		}
 
 		@Override
@@ -186,7 +193,7 @@ public class ClueWeb09Timex extends Configured implements Tool{
 					String firstLines = (contentScanner.hasNext()) ? contentScanner.nextLine() : "" + ((contentScanner.hasNext()) ? contentScanner.nextLine() : "" );
 					contentScanner.close();
 					//assume the publication date is from the first 2 lines
-					String pubDateTags = HeidelTimeStandalone.tag(content, firstLines, DocumentType.NARRATIVES);
+					String pubDateTags = narrative.tag(content, firstLines);
 					Matcher date = (pubDateTags == null) ? null : timex3Date.matcher(pubDateTags);
 					//the first extracted absolute date is the publication date
 					if (date != null && date.find()) {
@@ -205,10 +212,10 @@ public class ClueWeb09Timex extends Configured implements Tool{
 						content = DefaultExtractor.INSTANCE.getText(doc.getContent());
 						//reference point is not important here
 						//for HeidelTime
-						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.NARRATIVES);
+						timetags = narrative.tag(content, docDate.first);
 						//annotation is not necessary here 
 					} else {
-						timetags = HeidelTimeStandalone.tag(content, docDate.first, DocumentType.COLLOQUIAL);
+						timetags = colloguial.tag(content, docDate.first);
 						ArrayList<Triple<String, String, String>>  triples = HeidelTimeAnnotator.annotate(content, docDate.first);
 						for (Triple<String, String, String> triple : triples) {
 							_timetags.append(triple.toString());
@@ -228,10 +235,8 @@ public class ClueWeb09Timex extends Configured implements Tool{
 					put.add(Bytes.toBytes(TEMPEX_CF), Bytes.toBytes(RAW), Bytes.toBytes(timetags));
 					
 					put.add(Bytes.toBytes(TEMPEX_CF), Bytes.toBytes(ANNOTATED), Bytes.toBytes(_timetags.toString()));
-					//context.write(new Text(docid + "<TIMEX3 type=\"REFDATE\" value=\"" + docDate + "\"></TIMEX3>" +timetags), null);
 
 					context.write(new ImmutableBytesWritable(rowkey), put);
-					//context.getCounter(Counters.LINES).increment(1);
 
 				} catch (BoilerpipeProcessingException e) {}
 				catch (ArrayIndexOutOfBoundsException ae) {}
